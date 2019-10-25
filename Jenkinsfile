@@ -3,12 +3,19 @@ pipeline {
     stages {
         stage('Build'){
             steps{
-                bat 'mvn clean package'
-                bat "docker build . -t dockertest:${env.BUILD_ID}"
-                bat "docker login --username = samhitha1193"
-                bat "docker tag dockertest:${env.BUILD_ID} samhitha1193/dockertest:${env.BUILD_ID}"
-                bat "docker push samhitha1193/dockertest:${env.BUILD_ID}"
+                sh 'mvn clean package'
+                sh "docker build . -t tomcatwebapp:${env.BUILD_ID}"
             }
         }
+        stage ('Deploy') {
+            steps {
+             withCredentials([usernameColonPassword(credentialsId: 'PCF_LOGIN', variable: 'PCF_LOGIN')]) {
+    // some block
+                 sh 'cf login -a http://api.run.pivotal.io -u thisisnikhil86@gmail.com -p Super@8515'
+                 sh 'cf target -o nik -s development'
+                 sh 'cf push -f manifest.yml'          
+}
     }
+            }
+        }
 }
